@@ -1,57 +1,87 @@
 #include "game_engine.h"
-#include <iostream>
+#include <SDL2/SDL.h>
 #include <thread>
 
 GameEngine::GameEngine() {
   title = "Game";
   worldSize = {800, 800}; // default world size
-  isNetworkLoopEnabled = true;
-  isUpdateLoopEnabled = true;
-  isRenderLoopEnabled = true;
+  isNetworkIOEnabled = true;
+  isRenderingEnabled = true;
   setup();
 }
 
 GameEngine::GameEngine(std::string titleVal, Size worldSizeVal,
-                       bool enableNetwork, bool enableUpdate,
-                       bool enableRender) {
+                       bool enableNetwork, bool enableRender) {
   title = titleVal;
   worldSize = worldSizeVal;
-  isNetworkLoopEnabled = enableNetwork;
-  isUpdateLoopEnabled = enableUpdate;
-  isRenderLoopEnabled = enableRender;
+  isNetworkIOEnabled = enableNetwork;
+  isRenderingEnabled = enableRender;
   setup();
 }
 
 void GameEngine::setup() {
-  if (isRenderLoopEnabled) {
-    renderer.setup(title, worldSize);
+  running = false;
+  if (isRenderingEnabled) {
+    graphicsRenderer.setup(title, worldSize);
+  }
+  if (isNetworkIOEnabled) {
+    networkIO.setup();
   }
 }
 
 void GameEngine::run() {
   std::optional<std::thread> networkThread;
-  std::optional<std::thread> updateThread;
-  std::optional<std::thread> renderThread;
 
-  if (isNetworkLoopEnabled)
+  if (isNetworkIOEnabled)
     networkThread.emplace([&]() { runNetworkLoop(); });
-  if (isUpdateLoopEnabled)
-    updateThread.emplace([&]() { runUpdateLoop(); });
-  if (isRenderLoopEnabled)
-    renderThread.emplace([&]() { runRenderLoop(); });
 
-  std::cout << "GAME ENGINE RUNING" << std::endl;
+  runMainLoop();
 
   if (networkThread && networkThread->joinable())
     networkThread->join();
-  if (updateThread && updateThread->joinable())
-    updateThread->join();
-  if (renderThread && renderThread->joinable())
-    renderThread->join();
 }
 
-void GameEngine::runNetworkLoop() {}
+void GameEngine::runMainLoop() {
+  running = true;
+  while (running) {
+    for (auto &gameObject : gameObjects) {
+      gameObject->update();
+    }
 
-void GameEngine::runUpdateLoop() {}
+    // render
+    if (!isRenderingEnabled)
+      continue;
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
+        running = false;
+        break;
+      }
+    }
+    graphicsRenderer.drawFrame(gameObjects);
+  }
+}
 
-void GameEngine::runRenderLoop() {}
+void GameEngine::registerGameObject(GameObject &gameObjectVal) {
+  // Find the correct position to insert the new game object based on its zIndex
+  auto it =
+      std::upper_bound(gameObjects.begin(), gameObjects.end(), &gameObjectVal,
+                       [](const GameObject *a, const GameObject *b) {
+                         return a->zIndex < b->zIndex;
+                       });
+
+  // Insert the game object at the found position
+  gameObjects.insert(it, &gameObjectVal);
+}
+
+void GameEngine::deRegisterGameObject(GameObject &gameObjectVal) {
+  // Find the game object in the vector
+  auto it = std::find(gameObjects.begin(), gameObjects.end(), &gameObjectVal);
+
+  // Remove it if found
+  if (it != gameObjects.end()) {
+    gameObjects.erase(it);
+  }
+}
+
+void GameEngine::runNetworkLoop() { networkIO.run(running); }

@@ -1,7 +1,9 @@
 #include "graphics_renderer.h"
-#include "../types.h"
+#include "game_object.h"
+#include "types.h"
 #include <SDL2/SDL.h>
 #include <string>
+#include <vector>
 
 GraphicsRenderer::GraphicsRenderer() { isSetup = false; }
 
@@ -21,4 +23,22 @@ GraphicsRenderer::~GraphicsRenderer() {
     SDL_Quit();
     isSetup = false;
   }
+}
+
+void GraphicsRenderer::drawFrame(std::vector<GameObject *> &gameObjects) {
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderClear(renderer);
+  for (auto &gameObject : gameObjects) {
+    if (gameObject->isUsingTexture) {
+
+    } else {
+      SDL_SetRenderDrawColor(renderer, gameObject->fill.r, gameObject->fill.g,
+                             gameObject->fill.b, gameObject->fill.a);
+
+      SDL_Rect repr = {gameObject->position.x, gameObject->position.y,
+                       gameObject->size.width, gameObject->size.height};
+      SDL_RenderFillRect(renderer, &repr);
+    }
+  }
+  SDL_RenderPresent(renderer);
 }

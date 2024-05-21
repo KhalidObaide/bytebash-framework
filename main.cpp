@@ -1,8 +1,9 @@
-#include "engine/game_engine.h"
+#include "game/game.h"
 
 int main() {
-  GameEngine gameEngine = GameEngine();
-  // register game objects here
+  GameEngine gameEngine = GameEngine("My Game", {400, 400}, true, true);
+  Game game = Game(gameEngine);
+  game.setup();
   gameEngine.run();
   return 0;
 }
