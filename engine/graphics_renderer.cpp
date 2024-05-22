@@ -29,14 +29,22 @@ void GraphicsRenderer::drawFrame(std::vector<GameObject *> &gameObjects) {
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
   SDL_RenderClear(renderer);
   for (auto &gameObject : gameObjects) {
+    SDL_Rect repr = {gameObject->position.x, gameObject->position.y,
+                     gameObject->size.width, gameObject->size.height};
     if (gameObject->isUsingTexture) {
-
+      if (gameObjectTextures.find(gameObject) == gameObjectTextures.end() ||
+          gameObjectTextures[gameObject].first != gameObject->texturePath) {
+        gameObjectTextures[gameObject] = {};
+        gameObjectTextures[gameObject].first = gameObject->texturePath;
+        SDL_Surface *image = SDL_LoadBMP(gameObject->texturePath.c_str());
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
+        gameObjectTextures[gameObject].second = texture;
+      }
+      SDL_RenderCopy(renderer, gameObjectTextures[gameObject].second, NULL,
+                     &repr);
     } else {
       SDL_SetRenderDrawColor(renderer, gameObject->fill.r, gameObject->fill.g,
                              gameObject->fill.b, gameObject->fill.a);
-
-      SDL_Rect repr = {gameObject->position.x, gameObject->position.y,
-                       gameObject->size.width, gameObject->size.height};
       SDL_RenderFillRect(renderer, &repr);
     }
   }

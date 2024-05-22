@@ -3,8 +3,10 @@
 
 #include "game_object.h"
 #include "types.h"
-#include <SDL2/SDL_render.h>
+#include <SDL2/SDL.h>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 class GraphicsRenderer {
@@ -18,6 +20,8 @@ private:
   bool isSetup;
   SDL_Window *window;
   SDL_Renderer *renderer;
+  std::unordered_map<GameObject *, std::pair<std::string, SDL_Texture *>>
+      gameObjectTextures;
 };
 
 #endif // !GRAPHICS_RENDERER_H

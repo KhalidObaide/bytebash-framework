@@ -3,7 +3,7 @@
 #include "../engine/types.h"
 #include <cmath>
 
-Runner::Runner() : GameObject({0, 0}, {30, 30}, (RGBA){255, 255, 0, 255}) {
+Runner::Runner() : GameObject({0, 0}, {30, 30}, "game/assets/bk.bmp") {
   radius = 100; // Set the radius of the circular path
   angle = 0;    // Initialize the angle
 }

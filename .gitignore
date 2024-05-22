@@ -1,3 +1,4 @@
 .clangd
 .DS_Store
-output
+debug*
+release*
