@@ -13,16 +13,16 @@ public:
   GameEngine();
   GameEngine(std::string titleVal, Size worldSizeVal, bool enableNetwork,
              bool enableRender);
+
   void run();
   void registerGameObject(GameObject &gameObjectVal);
   void deRegisterGameObject(GameObject &gameObjectVal);
-
   void onNewNetworkAction(int connectionId, std::string action);
   void setOnNewActionCallback(std::function<void(int, std::string)> callback);
 
   std::unordered_map<int, std::string> *observationPerConnection;
-
   bool running;
+  std::string *endingMessage;
   NetworkIO networkIO;
 
 private:

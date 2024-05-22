@@ -11,13 +11,14 @@ class NetworkIO {
 public:
   NetworkIO(GameEngine &gameEngineVal);
   void setup();
-  void run(bool &running);
+  void run(bool &running, std::string *endingMessage);
   void setOnNewConnectionCallback(std::function<void(int)> callback);
 
   int connectionsLimit;
 
 private:
-  void handleConnection(int connectionId, bool &running);
+  void handleConnection(int connectionId, bool &running,
+                        std::string *endingMessage);
 
   int serverSocket;
   int port;

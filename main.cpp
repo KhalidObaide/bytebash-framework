@@ -3,7 +3,6 @@
 int main() {
   GameEngine gameEngine = GameEngine("My Game", {800, 800}, true, true);
   Game game = Game(gameEngine);
-  game.setup();
-  gameEngine.run();
+  game.run();
   return 0;
 }

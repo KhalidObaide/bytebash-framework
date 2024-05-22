@@ -35,7 +35,8 @@ void NetworkIO::setOnNewConnectionCallback(std::function<void(int)> callback) {
   onNewConnection = callback;
 }
 
-void NetworkIO::handleConnection(int connectionId, bool &running) {
+void NetworkIO::handleConnection(int connectionId, bool &running,
+                                 std::string *endingMessage) {
   while (running) {
     // Send game state
     const char *gameState = nullptr; // Initialize to nullptr for safety
@@ -68,11 +69,16 @@ void NetworkIO::handleConnection(int connectionId, bool &running) {
     }
   }
 
+  if (endingMessage) {
+    const char *finalState = endingMessage->c_str();
+    send(connectionId, finalState, strlen(finalState), 0);
+  }
+
   // Close the connection socket
   close(connectionId);
 }
 
-void NetworkIO::run(bool &running) {
+void NetworkIO::run(bool &running, std::string *endingMessage) {
   // listen & wait for connections
   listen(serverSocket, 5);
   std::vector<int> connections;
@@ -87,7 +93,8 @@ void NetworkIO::run(bool &running) {
     }
 
     // Create a new thread for the connection
-    threads.emplace_back([&]() { handleConnection(newConnectionId, running); });
+    threads.emplace_back(
+        [&]() { handleConnection(newConnectionId, running, endingMessage); });
   }
 
   // Wait for all threads to finish before sending "done" state

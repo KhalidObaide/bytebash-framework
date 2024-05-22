@@ -8,9 +8,10 @@ class Player : public GameObject {
 public:
   Player(int connectionIdVal);
   virtual ~Player();
-  void update() override;
-  void move();
-
+  void up();
+  void down();
+  void right();
+  void left();
   int connectionId;
 };
 

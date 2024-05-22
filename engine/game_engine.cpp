@@ -85,7 +85,7 @@ void GameEngine::deRegisterGameObject(GameObject &gameObjectVal) {
   }
 }
 
-void GameEngine::runNetworkLoop() { networkIO.run(running); }
+void GameEngine::runNetworkLoop() { networkIO.run(running, endingMessage); }
 
 void GameEngine::onNewNetworkAction(int connectionId, std::string action) {
   if (onNewAction) {
