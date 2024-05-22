@@ -11,7 +11,6 @@ public:
   void update() override;
   void move();
 
-private:
   int connectionId;
 };
 

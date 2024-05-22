@@ -17,6 +17,11 @@ public:
   void registerGameObject(GameObject &gameObjectVal);
   void deRegisterGameObject(GameObject &gameObjectVal);
 
+  void onNewNetworkAction(int connectionId, std::string action);
+  void setOnNewActionCallback(std::function<void(int, std::string)> callback);
+
+  std::unordered_map<int, std::string> *observationPerConnection;
+
   bool running;
   NetworkIO networkIO;
 
@@ -27,10 +32,11 @@ private:
   bool isRenderingEnabled;
   GraphicsRenderer graphicsRenderer;
   std::vector<GameObject *> gameObjects;
+  std::function<void(int, std::string)> onNewAction;
 
   void setup();
   void runNetworkLoop();
   void runMainLoop();
 };
 
-#endif
+#endif // GAME_ENGINE_H

@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 #include <thread>
 
-GameEngine::GameEngine() {
+GameEngine::GameEngine() : networkIO(NetworkIO(*this)) {
   title = "Game";
   worldSize = {800, 800}; // default world size
   isNetworkIOEnabled = true;
@@ -11,7 +11,8 @@ GameEngine::GameEngine() {
 }
 
 GameEngine::GameEngine(std::string titleVal, Size worldSizeVal,
-                       bool enableNetwork, bool enableRender) {
+                       bool enableNetwork, bool enableRender)
+    : networkIO(NetworkIO(*this)) {
   title = titleVal;
   worldSize = worldSizeVal;
   isNetworkIOEnabled = enableNetwork;
@@ -85,3 +86,14 @@ void GameEngine::deRegisterGameObject(GameObject &gameObjectVal) {
 }
 
 void GameEngine::runNetworkLoop() { networkIO.run(running); }
+
+void GameEngine::onNewNetworkAction(int connectionId, std::string action) {
+  if (onNewAction) {
+    onNewAction(connectionId, action);
+  }
+}
+
+void GameEngine::setOnNewActionCallback(
+    std::function<void(int, std::string)> callback) {
+  onNewAction = callback;
+}

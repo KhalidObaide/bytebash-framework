@@ -4,9 +4,12 @@
 
 #include <functional>
 #include <vector>
+
+class GameEngine; // just to forward-declare
+
 class NetworkIO {
 public:
-  NetworkIO();
+  NetworkIO(GameEngine &gameEngineVal);
   void setup();
   void run(bool &running);
   void setOnNewConnectionCallback(std::function<void(int)> callback);
@@ -14,10 +17,13 @@ public:
   int connectionsLimit;
 
 private:
+  void handleConnection(int connectionId, bool &running);
+
   int serverSocket;
   int port;
   std::vector<int> connections;
   std::function<void(int)> onNewConnection;
+  GameEngine &gameEngine;
 };
 
 #endif // !NETWORK_IO_H

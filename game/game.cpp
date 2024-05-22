@@ -1,20 +1,37 @@
 #include "game.h"
-#include <iostream>
 #include <memory>
 
-Game::Game(GameEngine &gameEngineVal) : gameEngine(gameEngineVal) {
-  gameEngine.networkIO.connectionsLimit = 3;
+Game::Game(GameEngine &gameEngineVal) : gameEngine(gameEngineVal) {}
+
+void Game::setup() {
+  gameEngine.networkIO.connectionsLimit = 2;
   gameEngine.networkIO.setOnNewConnectionCallback(
       std::bind(&Game::initNewPlayer, this, std::placeholders::_1));
-}
+  gameEngine.setOnNewActionCallback(std::bind(
+      &Game::handleAction, this, std::placeholders::_1, std::placeholders::_2));
 
-void Game::initNewPlayer(int connectionId) {
-  players.push_back(std::make_unique<Player>(Player(connectionId)));
-  players.back()->position.x = connectionId * 20;
-  players.back()->setFillColor(utils.getNextColor());
-  gameEngine.registerGameObject(*players.back().get());
+  runner = Runner();
+  gameEngine.registerGameObject(runner);
+  gameEngine.observationPerConnection = &gameStatePerConnection;
 }
 
 void Game::run() { gameEngine.run(); }
 
-void Game::setup() { std::cout << "SETUP GAME COMPELETE" << std::endl; }
+void Game::initNewPlayer(int connectionId) {
+  gameStatePerConnection[connectionId] = "HELLO";
+  players.push_back(std::make_unique<Player>(Player(connectionId)));
+  players.back()->setFillColor(utils.getNextColor());
+  gameEngine.registerGameObject(*players.back().get());
+}
+
+void Game::handleAction(int connectionId, std::string action) {
+  for (auto &player : players) {
+    if (player->connectionId == connectionId) {
+      if (action == "MOVE") {
+        player->position.x += 10;
+        gameStatePerConnection[connectionId] =
+            "MOVE: " + std::to_string(player->position.x);
+      }
+    }
+  }
+}
